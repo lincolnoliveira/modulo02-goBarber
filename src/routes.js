@@ -8,8 +8,6 @@ import authMiddleware from './app/middlewares/auth';
 
 const routes = new Router();
 
-routes.use(authMiddleware);
-
 // rota post, para incluir, passa a função store do controller, como um middleware
 routes.post('/users', UserController.store);
 

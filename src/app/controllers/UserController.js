@@ -28,9 +28,37 @@ class UserController {
     }
 
     async update(req, res) {
-        console.log(req.userId);
+        const { email, oldPassword, password } = req.body;
+        const user = await User.findByPk(req.userId);
 
-        return res.json({ ok: true });
+        // só vai verificar duplicidade de email se estiver mudando
+        if (email && email !== user.email) {
+            const exists = await User.findOne({ where: { email } });
+
+            if (exists) {
+                return res
+                    .status(400)
+                    .json({ error: 'Novo e-mail já está sendo usado.' });
+            }
+        }
+        // verifica se a senha antiga passada está correta
+        if (password && !oldPassword) {
+            return res.status(400).json({
+                error:
+                    'Para modificar a senha é necessário informar a senha antiga.',
+            });
+        }
+        if (oldPassword && !(await user.checkPassword(oldPassword))) {
+            return res.status(400).json({ error: 'Senha inválida.' });
+        }
+
+        const { id, name, provider } = await user.update(req.body);
+        return res.json({
+            id,
+            name,
+            email,
+            provider,
+        });
     }
 }
 
