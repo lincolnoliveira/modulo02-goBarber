@@ -3,10 +3,18 @@
 import { Router } from 'express';
 import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
+import multer from 'multer';
+import multerConfig from './config/multer';
 
 import authMiddleware from './app/middlewares/auth';
 
 const routes = new Router();
+
+const upload = multer(multerConfig);
+
+routes.post('/files', upload.single('file'), (req, res) => {
+    return res.json({ok: true});
+})
 
 // rota post, para incluir, passa a função store do controller, como um middleware
 routes.post('/users', UserController.store);
@@ -18,6 +26,7 @@ routes.post('/sessions', SessionController.store);
 // apesar de global, só vale para as rotas depois de sua declaração (tosco)
 routes.use(authMiddleware);
 routes.put('/users', UserController.update);
+
 
 // module.exports = routes;
 export default routes;
