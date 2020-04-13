@@ -12,8 +12,11 @@ export default {
             crypto.randomBytes(16, (err, res) => {
                 if (err) return cb(err); // se der erro, chama a função callback cb com o erro
                 // se tudo certo, chama o cb com null (err), um hexa aleatório e a extensão
-                return cb(null, res.toString('hex') + extname(file.originalname))
-            })
-        }
-    })
-}
+                return cb(
+                    null,
+                    res.toString('hex') + extname(file.originalname)
+                );
+            });
+        },
+    }),
+};

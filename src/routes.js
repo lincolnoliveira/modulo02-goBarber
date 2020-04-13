@@ -1,20 +1,18 @@
 // importando apenas a parte de roteamento do express
 // const { Router } = require('express');
 import { Router } from 'express';
-import UserController from './app/controllers/UserController';
-import SessionController from './app/controllers/SessionController';
 import multer from 'multer';
 import multerConfig from './config/multer';
+
+import UserController from './app/controllers/UserController';
+import SessionController from './app/controllers/SessionController';
+import FileController from './app/controllers/FileController';
 
 import authMiddleware from './app/middlewares/auth';
 
 const routes = new Router();
 
 const upload = multer(multerConfig);
-
-routes.post('/files', upload.single('file'), (req, res) => {
-    return res.json({ok: true});
-})
 
 // rota post, para incluir, passa a função store do controller, como um middleware
 routes.post('/users', UserController.store);
@@ -26,7 +24,8 @@ routes.post('/sessions', SessionController.store);
 // apesar de global, só vale para as rotas depois de sua declaração (tosco)
 routes.use(authMiddleware);
 routes.put('/users', UserController.update);
-
+// upload de arquivo
+routes.post('/files', upload.single('file'), FileController.store);
 
 // module.exports = routes;
 export default routes;
