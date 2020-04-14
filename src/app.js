@@ -6,6 +6,7 @@
 // Mas dá para usar algumas bibliotecas que traduzem o código para versões mais
 // antigas do javascript, como o babel e o sucrase. Vamos usar o sucrase
 import express from 'express';
+import path from 'path';
 import routes from './routes';
 
 import './database';
@@ -20,6 +21,12 @@ class App {
 
     middlewares() {
         this.server.use(express.json());
+        // este middle cria um "rota" de acesso para conteúdo estático,
+        // no caso, a rota /files trará os arquivos do diretótio ../tmp/uploads
+        this.server.use(
+            '/files',
+            express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+        );
     }
 
     routes() {
