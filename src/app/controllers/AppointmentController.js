@@ -3,6 +3,7 @@ import { startOfHour, parseISO, isBefore } from 'date-fns';
 
 import Appointment from '../models/Appointment';
 import User from '../models/User';
+import File from '../models/File';
 
 class AppointmentController {
     async store(req, res) {
@@ -60,6 +61,39 @@ class AppointmentController {
         });
 
         return res.json(appoint);
+    }
+
+    async index(req, res) {
+        // pega a query da url (após o ?), para obter a página
+        // por default page será 1
+        const { page = 1 } = req.query;
+
+        const appointments = await Appointment.findAll({
+            where: { user_id: req.userId, canceled_at: null },
+            attributes: ['id', 'date'],
+            order: ['date'],
+            // 5 por página
+            limit: 5,
+            offset: (page - 1) * 5,
+            include: [
+                // para incluir relacionamentos, no caso apenas um
+                {
+                    model: User,
+                    as: 'provider',
+                    attributes: ['id', 'name'],
+                    include: [
+                        // include dentro de include...
+                        {
+                            model: File,
+                            as: 'avatar',
+                            attributes: ['id', 'path', 'url'],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        return res.json(appointments);
     }
 }
 
