@@ -13,6 +13,8 @@ import User from '../models/User';
 import File from '../models/File';
 import Notification from '../schemas/Notification';
 
+import Mail from '../../lib/Mail';
+
 class AppointmentController {
     async store(req, res) {
         const schema = Yup.object().shape({
@@ -117,7 +119,16 @@ class AppointmentController {
     }
 
     async delete(req, res) {
-        const appoint = await Appointment.findByPk(req.params.id);
+        // vai aproveitar e buscar os dados do provedor qdo busca o agendamento
+        const appoint = await Appointment.findByPk(req.params.id, {
+            include: [
+                {
+                    model: User,
+                    as: 'provider',
+                    attributes: ['name', 'email'],
+                },
+            ],
+        });
         if (!appoint) {
             return res.status(400).json({
                 error: 'Não encontrou o agendamento.',
@@ -141,7 +152,12 @@ class AppointmentController {
             });
         }
         appoint.canceled_at = new Date();
-        await appoint.save();
+        //        await appoint.save();
+        await Mail.sendMail({
+            to: `${appoint.provider.name} <${appoint.provider.email}>`,
+            subject: 'Agendamento cancelado',
+            text: 'Perdeu playboy',
+        });
         return res.json(appoint);
     }
 }
