@@ -1,5 +1,12 @@
 import * as Yup from 'yup';
-import { startOfHour, parseISO, isBefore, format, pt } from 'date-fns';
+import {
+    startOfHour,
+    parseISO,
+    isBefore,
+    format,
+    pt,
+    subHours,
+} from 'date-fns';
 
 import Appointment from '../models/Appointment';
 import User from '../models/User';
@@ -107,6 +114,35 @@ class AppointmentController {
         });
 
         return res.json(appointments);
+    }
+
+    async delete(req, res) {
+        const appoint = await Appointment.findByPk(req.params.id);
+        if (!appoint) {
+            return res.status(400).json({
+                error: 'Não encontrou o agendamento.',
+            });
+        }
+        if (appoint.canceled_at) {
+            return res.status(400).json({
+                error: 'Agendamento já estava cancelado.',
+            });
+        }
+        if (appoint.user_id !== req.userId) {
+            return res.status(401).json({
+                error: 'Apenas o próprio usuário pode cancelar o agendamento.',
+            });
+        }
+
+        const dataLimite = subHours(appoint.date, 2);
+        if (isBefore(dataLimite, new Date())) {
+            return res.status(401).json({
+                error: 'Limite para cancelamento: 2h antes do agendamento.',
+            });
+        }
+        appoint.canceled_at = new Date();
+        await appoint.save();
+        return res.json(appoint);
     }
 }
 
