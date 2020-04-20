@@ -127,6 +127,11 @@ class AppointmentController {
                     as: 'provider',
                     attributes: ['name', 'email'],
                 },
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['name'],
+                },
             ],
         });
         if (!appoint) {
@@ -141,7 +146,7 @@ class AppointmentController {
         }
         if (appoint.user_id !== req.userId) {
             return res.status(401).json({
-                error: 'Apenas o próprio usuário pode cancelar o agendamento.',
+                error: 'Apenas o próprio provedor pode cancelar o agendamento.',
             });
         }
 
@@ -152,11 +157,20 @@ class AppointmentController {
             });
         }
         appoint.canceled_at = new Date();
-        //        await appoint.save();
+
+        await appoint.save();
+
         await Mail.sendMail({
             to: `${appoint.provider.name} <${appoint.provider.email}>`,
             subject: 'Agendamento cancelado',
-            text: 'Perdeu playboy',
+            template: 'cancellation',
+            context: {
+                provider: appoint.provider.name,
+                user: appoint.user.name,
+                date: format(appoint.date, "'dia 'dd' de 'MMMM', às 'H:mm'h'", {
+                    locale: pt,
+                }),
+            },
         });
         return res.json(appoint);
     }
