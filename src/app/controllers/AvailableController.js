@@ -37,14 +37,6 @@ class AvailableController {
             },
             attributes: ['id', 'date'],
             order: ['date'],
-            include: [
-                // para incluir relacionamentos, no caso apenas um
-                {
-                    model: User,
-                    as: 'user',
-                    attributes: ['id', 'name'],
-                },
-            ],
         });
 
         const schedule = [
