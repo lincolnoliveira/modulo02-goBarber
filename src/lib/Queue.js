@@ -38,8 +38,12 @@ class Queue {
             // obtém o bee (com acesso ao redis) e o handle
             const { bee, handle } = this.queues[job.key];
             // e manda o bee processar o handle
-            bee.process(handle);
+            bee.on('failed', this.handleFailure).process(handle);
         });
+    }
+
+    handleFailure(job, err) {
+        console.log(`Fila ${job.queue.name}: FALHOU`, err);
     }
 }
 
