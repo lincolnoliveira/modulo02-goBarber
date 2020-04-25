@@ -1,3 +1,5 @@
+import 'dotenv/config'; // importa vars do .env e ficam acessíveis em process.env.VARIAVEL
+
 import express from 'express';
 import path from 'path';
 import * as Sentry from '@sentry/node';
@@ -40,9 +42,13 @@ class App {
     exceptionHandler() {
         // qdo o middleware recebe 4 parâmetros, o express sabe que é de tto de exceção
         this.server.use(async (err, req, res, next) => {
-            const errors = await new Youch(err, req).toJSON();
-
-            return res.status(500).json(errors); // erro 500, erro interno do servidor
+            let error;
+            if (process.env.NODE_ENV === 'development') {
+                error = await new Youch(err, req).toJSON();
+            } else {
+                error = { error: 'Erro interno do servidor.' };
+            }
+            return res.status(500).json(error); // erro 500, erro interno do servidor
         });
     }
 }

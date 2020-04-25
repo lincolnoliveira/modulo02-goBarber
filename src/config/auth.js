@@ -1,4 +1,4 @@
 export default {
-    secret: 'frase-unica-que-nunca-se-repetira',
-    expiresIn: '7d',
+    secret: process.env.APP_SECRET,
+    expiresIn: process.env.EXPIRES_IN,
 };
