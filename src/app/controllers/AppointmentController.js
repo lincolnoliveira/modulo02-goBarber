@@ -92,7 +92,7 @@ class AppointmentController {
 
         const appointments = await Appointment.findAll({
             where: { user_id: req.userId, canceled_at: null },
-            attributes: ['id', 'date'],
+            attributes: ['id', 'date', 'past', 'cancelable'],
             order: ['date'],
             // 5 por página
             limit: 5,
